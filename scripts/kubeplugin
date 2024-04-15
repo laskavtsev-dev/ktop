@@ -1,0 +1,25 @@
+#!/bin/bash
+
+# Define command-line arguments
+
+RESOURCE_TYPE=$1
+NS=$2
+
+if [[ "$RESOURCE_TYPE" != "node" && "$RESOURCE_TYPE" != "pod" ]]; then
+  echo "Invalid resource type. Please specify 'node' or 'pod'."
+  echo "Usage: kubeplugin <node || pod> resource_name"
+  exit 1
+fi
+
+# 
+kubectl top $RESOURCE_TYPE -n $2 | tail -n +2 | while read line
+do
+  # Extract CPU and memory usage from the output
+  NAME=$(echo $line | awk '{print $1}')
+  CPU=$(echo $line | awk '{print $2}')
+  MEMORY=$(echo $line | awk '{print $3}')
+
+  # Output the statistics to the console
+  # "Resource, Namespace, Name, CPU, Memory"
+  echo "$RESOURCE_TYPE, $NS, $NAME, $CPU, $MEMORY"
+done
